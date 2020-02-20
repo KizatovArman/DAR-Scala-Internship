@@ -2,19 +2,13 @@ import actors.FilmActor
 import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.Timeout
 import org.slf4j.LoggerFactory
-
-import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
-import akka.http.scaladsl.marshalling.Marshal
 import com.datastax.driver.core.{Cluster, Session}
-import com.typesafe.config.Config
 import models._
 import serializers.SprayJsonSerializer
 
@@ -53,6 +47,11 @@ object Boot extends App with SprayJsonSerializer {
         complete {
           (filmActor ? FilmActor.GetFilm(filmId.toInt)).mapTo[Either[ErrorResponse, Film]]
         }
+      } ~
+      delete {
+        complete {
+          (filmActor ? FilmActor.DeleteFilm(filmId.toInt)).mapTo[Either[ErrorResponse, SuccessfulResponse]]
+        }
       }
     } ~
     path("films")
@@ -61,6 +60,13 @@ object Boot extends App with SprayJsonSerializer {
         entity(as[Film]) { film =>
           complete{
             (filmActor ? FilmActor.CreateFilm(film)).mapTo[Either[ErrorResponse, SuccessfulResponse]]
+          }
+        }
+      } ~
+      put {
+        entity(as[Film]) { film =>
+          complete {
+            (filmActor ? FilmActor.UpdateFilm(film)).mapTo[Either[ErrorResponse, SuccessfulResponse]]
           }
         }
       }

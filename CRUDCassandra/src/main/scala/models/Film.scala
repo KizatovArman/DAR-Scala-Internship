@@ -7,8 +7,4 @@ package models
   * @param yearOfPublication
   */
 
-case class Film(f_id: Int, f_title: String, year_of_publication: Int) {
-  def toBindSeq: Seq[Film] = {
-    Seq(Film(f_id, f_title, year_of_publication))
-  }
-}
+case class Film(f_id: Int, f_title: String, year_of_publication: Int)
